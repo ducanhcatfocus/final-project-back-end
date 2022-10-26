@@ -16,5 +16,9 @@ const conversationSchema = new Schema({
       index: true,
     },
   ],
+  newMessage: {
+    type: Boolean,
+    default: false,
+  },
 });
 module.exports = mongoose.model("Conversation", conversationSchema);

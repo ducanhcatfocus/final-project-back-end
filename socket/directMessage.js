@@ -67,6 +67,8 @@ const directMessageHandle = async (socket, data, io, getActiveConnections) => {
 
     if (conversation) {
       conversation.messages.push(message._id);
+      conversation.newMessage = true;
+
       await conversation.save();
 
       //update chatbox of sender and receiver if they online
@@ -82,6 +84,7 @@ const directMessageHandle = async (socket, data, io, getActiveConnections) => {
     const newConversation = await Conversation.create({
       messages: [message._id],
       participants: [userId, receiverId],
+      newMessage: true,
     });
     //update chatbox of sender and receiver if they online
 
@@ -99,14 +102,15 @@ const directMessageHandle = async (socket, data, io, getActiveConnections) => {
 
 const typingHandle = (socket, data, io, getActiveConnections) => {
   const { id, isTyping } = data;
+  const { userId } = socket.user;
   const activeConnection = getActiveConnections(id.toString());
   console.log(activeConnection);
   activeConnection.forEach((socketId) => {
     if (!isTyping) {
-      io.to(socketId).emit("update-typing", "");
+      io.to(socketId).emit("update-typing", { type: "", id: userId });
       return;
     }
-    io.to(socketId).emit("update-typing", "Typing...");
+    io.to(socketId).emit("update-typing", { type: "typing...", id: userId });
   });
 };
 

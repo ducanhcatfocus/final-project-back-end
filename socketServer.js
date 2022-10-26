@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 
 let userConnected = [];
 let activeRooms = [];
+let time = [];
 let io = null;
 
 const registerSocketServer = (server) => {
@@ -53,8 +54,18 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("room-create", (data) => {
-      console.log(data);
+      // console.log(data);
 
+      // const myTimeout = setTimeout(() => {
+      //
+      //   time.pop();
+      //   console.log("10 giay");
+      //   console.log(time);
+      // }, 10000);
+      // time.push(myTimeout);
+      // console.log(time);
+      // clearTimeout(time[0]);
+      // }
       roomCreateHandler(socket, data, addNewActiveRoom);
       emitActiveRooms();
     });
@@ -89,13 +100,13 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("chat-room", (data) => {
-      console.log(data);
-      const { roomId, chat } = data;
+      const { roomId, chat, userName } = data;
       const date = new Date();
 
       io.to(roomId).emit("update-chat-room", {
         chat,
-        time: date.toLocaleTimeString(),
+        userName,
+        time: null,
       });
     });
 

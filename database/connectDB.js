@@ -10,7 +10,7 @@ const connectDatabase = () => {
   mongoose
     .connect(mongoDbUrl, {
       useNewUrlParser: true,
-      useUnifiedTopology: true,
+      useUnifiedTopology: false,
     })
     .then(() => {
       console.log("Successfully connected to the database");

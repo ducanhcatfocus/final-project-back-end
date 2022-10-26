@@ -5,8 +5,6 @@ const roomCreateHandler = (socket, data, addNewActiveRoom) => {
 
   const roomDetails = addNewActiveRoom(userId, socketId, data);
 
-  // console.log(roomDetails);
-
   socket.emit("room-create", roomDetails);
 
   socket.join(roomDetails.roomId);

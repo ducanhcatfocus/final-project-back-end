@@ -14,6 +14,7 @@ const {
   resetPassword,
   signIn,
   getUserByEmail,
+  getAllUsersByEmail,
 } = require("../controllers/userController");
 const { isAuth } = require("../middlewares/auth");
 const { isValidPassResetToken } = require("../middlewares/user");
@@ -66,5 +67,7 @@ router.get("/auth", isAuth, (req, res) => {
     },
   });
 });
+
+router.get("/searchReceiver", isAuth, getAllUsersByEmail);
 
 module.exports = router;

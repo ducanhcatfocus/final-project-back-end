@@ -212,6 +212,22 @@ const getUserByEmail = async (req, res) => {
   });
 };
 
+const getAllUsersByEmail = async (req, res) => {
+  const { search } = req.query;
+  const regex = new RegExp(search, "i");
+  console.log(regex);
+  const user = await User.find(
+    { email: regex },
+    { friends: 0, isVerified: 0, password: 0, __v: 0 }
+  );
+  console.log(user.length);
+  // if (!user) return sendError(res, "User not found!");
+
+  // const { _id, name, avatar } = user;
+
+  res.status(200).json(user);
+};
+
 module.exports = {
   create,
   verifyEmail,
@@ -221,4 +237,5 @@ module.exports = {
   resetPassword,
   signIn,
   getUserByEmail,
+  getAllUsersByEmail,
 };
