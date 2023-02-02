@@ -71,9 +71,9 @@ const registerSocketServer = (server) => {
     });
 
     socket.on("room-join", (data) => {
-      const { roomId, userName, userAvatar, userMail } = data;
+      const { roomId, userName, userAvatar, userMail, roomPassword } = data;
       let afterJoin;
-      socket.join(roomId);
+      let isRoom = false;
       const participantDetails = {
         userId: socket.user.userId,
         socketId: socket.id,
@@ -85,18 +85,27 @@ const registerSocketServer = (server) => {
       // const roomDetails = getRoom(roomId);
       for (const room of activeRooms) {
         if (room.roomId === roomId) {
+          if (room.roomPassword !== roomPassword) {
+            io.to(socket.id).emit(
+              "join-room-error",
+              "Room Password incorrect!"
+            );
+            return (isRoom = true);
+          }
+          socket.join(roomId);
           room.participants = [...room.participants, participantDetails];
           afterJoin = room;
-          break;
+          io.to(roomId).emit("join-room", afterJoin);
+          socket.broadcast.to(roomId).emit("conn-prepare", {
+            connUserSocketId: socket.id,
+          });
+          emitActiveRooms();
+          return (isRoom = true);
         }
       }
-      io.to(roomId).emit("join-room", afterJoin);
-      socket.broadcast.to(roomId).emit("conn-prepare", {
-        connUserSocketId: socket.id,
-      });
-      emitActiveRooms();
-
-      console.log(activeRooms);
+      if (!isRoom) {
+        io.to(socket.id).emit("join-room-error", "No room found");
+      }
     });
 
     socket.on("chat-room", (data) => {
@@ -118,17 +127,25 @@ const registerSocketServer = (server) => {
 
       for (const room of activeRooms) {
         if (room.roomId === roomId) {
+          if (room.participants.length === 1) {
+            console.log(activeRooms);
+            activeRooms = activeRooms.filter((r) => {
+              return r !== room;
+            });
+            break;
+          }
+          console.log("sdadsadasdasdsadasdsa");
           room.participants = room.participants.filter(
             (p) => p.socketId !== socket.id
           );
           afterLeave = room;
+          io.to(roomId).emit("join-room", afterLeave);
+          io.to(roomId).emit("room-participant-left", {
+            connUserSocketId: socket.id,
+          });
           break;
         }
       }
-      io.to(roomId).emit("join-room", afterLeave);
-      io.to(roomId).emit("room-participant-left", {
-        connUserSocketId: socket.id,
-      });
       emitActiveRooms();
     });
 

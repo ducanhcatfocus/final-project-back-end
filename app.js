@@ -9,6 +9,7 @@ const friendRouter = require("./routes/friend");
 const documentRouter = require("./routes/document");
 const flowRouter = require("./routes/flow");
 const chatRouter = require("./routes/chat");
+const notificationRouter = require("./routes/notification");
 
 const connectDatabase = require("./database/connectDB");
 const { errorHandler } = require("./middlewares/errorHandler");
@@ -31,6 +32,8 @@ app.use("/api/friend-invitation", friendRouter);
 app.use("/api/document", documentRouter);
 app.use("/api/flow", flowRouter);
 app.use("/api/conversation", chatRouter);
+app.use("/api/notification", notificationRouter);
+
 app.use("*", handleNotFoundApi);
 
 connectDatabase();

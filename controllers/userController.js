@@ -3,6 +3,7 @@ const { isValidObjectId } = require("mongoose");
 const User = require("../models/user");
 const EmailVerifyToken = require("../models/emailVerifytoken");
 const PasswordResetToken = require("../models/passwordResetToken");
+const Notification = require("../models/notification");
 const sendEmail = require("../config/sendMail");
 const { generateOTP } = require("../utils/generateOTP");
 const { sendError, generateRandomByte } = require("../utils/helper");
@@ -39,6 +40,12 @@ const create = async (req, res) => {
     token: OTP,
   });
   await newEmailVerifyToken.save();
+
+  const newNotification = new Notification({
+    owner: newUser._id,
+    notifications: [],
+  });
+  await newNotification.save();
 
   //send otp email
   sendEmail({
@@ -220,10 +227,6 @@ const getAllUsersByEmail = async (req, res) => {
     { email: regex },
     { friends: 0, isVerified: 0, password: 0, __v: 0 }
   );
-  console.log(user.length);
-  // if (!user) return sendError(res, "User not found!");
-
-  // const { _id, name, avatar } = user;
 
   res.status(200).json(user);
 };

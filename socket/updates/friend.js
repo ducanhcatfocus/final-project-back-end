@@ -9,7 +9,7 @@ const updateFriendPendingInvitation = async (userId) => {
   try {
     const pending = await FriendInvitation.find({
       receiverId: userId,
-    }).populate("senderId", "_id name email");
+    }).populate("senderId", "_id name email avatar");
 
     //find user online
     console.log(userId);

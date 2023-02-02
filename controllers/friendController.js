@@ -1,4 +1,5 @@
 const FriendInvitation = require("../models/friendInvitation");
+const Notification = require("../models/notification");
 const User = require("../models/user");
 const {
   updateFriendPendingInvitation,
@@ -10,7 +11,7 @@ const friendInvitation = async (req, res) => {
   const { _id: userId } = req.user;
   const pending = await FriendInvitation.find({
     receiverId: userId,
-  }).populate("senderId", "_id name email");
+  }).populate("senderId", "_id name email avatar");
 
   return res.status(200).json({ data: pending });
 };
@@ -56,12 +57,20 @@ const sendFriendInvitation = async (req, res) => {
   if (myFriend) {
     return sendError(res, "This account is already your friend");
   }
-  console.log(userId);
-  const newInvitation = await FriendInvitation.create({
+
+  await FriendInvitation.create({
     senderId: userId,
     receiverId: targetUser._id,
   });
   //update friend in User model
+  // await Notification.findOneAndUpdate(
+  //   { owner: targetUser._id },
+  //   {
+  //     $push: {
+  //       notifications: { sender: email, content: "sent you a friend request" },
+  //     },
+  //   }
+  // );
 
   // send pending socket
   updateFriendPendingInvitation(targetUser._id.toString());
@@ -70,7 +79,6 @@ const sendFriendInvitation = async (req, res) => {
 
 const acceptFriendInvitation = async (req, res) => {
   const { id } = req.body;
-  const { _id: userId } = req.user;
 
   const invitation = await FriendInvitation.findById(id);
   if (!invitation) {

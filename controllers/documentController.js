@@ -14,23 +14,32 @@ cloudinary.config({
 
 const sendDocument = async (req, res) => {
   const { receiver, subject, content } = req.body;
-  console.log(receiver);
-  console.log(subject);
-  console.log(content);
-  // const { file } = req;
+  const { file } = req;
   const { _id: senderId } = req.user;
 
   let receiverArr = JSON.parse(receiver);
+  let url;
+  console.log(file);
 
-  // const { secure_url, public_id } = await cloudinary.uploader.upload(
-  //   file.path,
-  //   { folder: "documents" }
-  // );
+  if (file) {
+    const { secure_url } = await cloudinary.uploader.upload(file.path, {
+      folder: "documents",
+    });
+    url = secure_url;
+  }
+
   const newDocument = await Document.create({
     sender: senderId,
     subject: subject,
     content: content,
     receivers: receiverArr,
+    file: [
+      {
+        url: url,
+        filename: file ? file.filename : "",
+        mimetype: file ? file.mimetype : "",
+      },
+    ],
   });
 
   receiverArr.forEach((element) => {
@@ -48,7 +57,6 @@ const sendDocument = async (req, res) => {
 
 const myDocument = async (req, res) => {
   const { _id: senderId } = req.user;
-
   const allDocument = await Document.find(
     {
       sender: senderId,
@@ -60,10 +68,34 @@ const myDocument = async (req, res) => {
   return res.status(200).json({ data: allDocument });
 };
 
+const searchMyDocument = async (req, res) => {
+  const { _id: senderId } = req.user;
+  const { search } = req.query;
+  const regex = new RegExp(search, "i");
+  const allDocument = await Document.find(
+    {
+      content: regex,
+      sender: senderId,
+      isDelete: false,
+    },
+    { isDelete: 0, sender: 0, password: 0, __v: 0 }
+  );
+
+  return res.status(200).json({ data: allDocument });
+};
+
 const getDocument = async (req, res) => {
   const { documentId } = req.params;
+  const { email } = req.user;
 
   if (!isValidObjectId(documentId)) return sendError(res, "Invalid request!");
+
+  await ReceiverDocument.findOneAndUpdate(
+    {
+      receiverEmail: email,
+    },
+    { isRead: true }
+  );
 
   const document = await Document.findOne(
     {
@@ -99,7 +131,7 @@ const receivedDocument = async (req, res) => {
 };
 
 const deleteDocument = async (req, res) => {
-  const documentId = req.params;
+  const { documentId } = req.params;
 
   await Document.findOneAndUpdate(
     {
@@ -117,4 +149,6 @@ module.exports = {
   receivedDocument,
   myDocument,
   getDocument,
+  searchMyDocument,
+  deleteDocument,
 };

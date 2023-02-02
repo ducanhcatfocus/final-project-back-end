@@ -3,14 +3,20 @@ const nodemailer = require("nodemailer");
 const sendEmail = async (options) => {
   //create transporter
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    // host: process.env.EMAIL_HOST,
+    // port: process.env.EMAIL_PORT,
+    // auth: {
+    //   user: process.env.EMAIL_USERNAME,
+    //   pass: process.env.EMAIL_PASSWORD,
+    // },
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
+      user: "anhnd277@gmail.com",
+      pass: "sjzfunajodnvavrl",
     },
-
-    //activate in gmail "less secure app" option
   });
   //define the email option
   const mailOptions = {
@@ -20,7 +26,7 @@ const sendEmail = async (options) => {
     html: options.html,
   };
 
-  //send email with nodemailer
+  //send email with nodemailerSS
   await transporter.sendMail(mailOptions);
 };
 

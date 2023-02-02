@@ -6,6 +6,8 @@ const {
   receivedDocument,
   myDocument,
   getDocument,
+  searchMyDocument,
+  deleteDocument,
 } = require("../controllers/documentController");
 const router = express.Router();
 
@@ -17,6 +19,8 @@ router.post(
 );
 router.get("/received-document", isAuth, receivedDocument);
 router.get("/my-document", isAuth, myDocument);
+router.get("/search-my-document", isAuth, searchMyDocument);
 router.get("/document-detail/:documentId", isAuth, getDocument);
+router.put("/document-detail/:documentId", isAuth, deleteDocument);
 
 module.exports = router;
